@@ -1,0 +1,7 @@
+*.o
+*.a
+*.so
+*.d
+*.gcda
+*.gcno
+.DS_Store

@@ -1,0 +1,114 @@
+#ifndef SYDO_PARAMETERS_H
+#define SYDO_PARAMETERS_H
+
+#include <stddef.h>
+#include <stdint.h>
+
+/* Select a parameter set with PARAM in the Makefile. */
+#ifndef SYDO_LAMBDA
+#define SYDO_LAMBDA 160
+#endif
+
+#if SYDO_LAMBDA == 160
+#include "parameters/160.h"
+#define SYDO_INSTANCE_PREFIX "sydo_160"
+#define SYDO_CIPHER_KEY_BYTES 24u
+#define SYDO_CIPHER_BLOCK_BYTES 24u
+#define SYDO_CIPHER_ROUNDS 12u
+#define SYDO_FIELD_MODULUS 0x39u
+#elif SYDO_LAMBDA == 256
+#include "parameters/256.h"
+#define SYDO_INSTANCE_PREFIX "sydo_256"
+#define SYDO_CIPHER_KEY_BYTES 32u
+#define SYDO_CIPHER_BLOCK_BYTES 32u
+#define SYDO_CIPHER_ROUNDS 14u
+#define SYDO_FIELD_MODULUS 0x425u
+#elif SYDO_LAMBDA == 512
+#include "parameters/512.h"
+#define SYDO_INSTANCE_PREFIX "sydo_512"
+#define SYDO_CIPHER_KEY_BYTES 64u
+#define SYDO_CIPHER_BLOCK_BYTES 64u
+#define SYDO_CIPHER_ROUNDS 10u
+#define SYDO_FIELD_MODULUS 0x125u
+#define SYDO_MATRIX_BLOCK_BYTES 64u
+#define SYDO_CIPHER_BLAKE2S
+#else
+#error Unsupported security parameter
+#endif
+#define SYDO_SEED_BYTES (SYDO_LAMBDA / 8u)
+#define SYDO_VOLE_BLOCK_OUTPUT_BYTES SYDO_SEED_BYTES
+#define SYDO_FIELD_WORDS ((SYDO_LAMBDA + 63u) / 64u)
+/* RSD dimensions. */
+#define SYDO_RSD_SYNDROME_BITS (SYDO_RSD_N - SYDO_RSD_K)
+#define SYDO_RSD_INPUT_BITS (SYDO_RSD_ETA_0 + SYDO_RSD_ETA_1)
+#define SYDO_RSD_SELECTOR_TERMS (1u + SYDO_RSD_ETA_0)
+#define SYDO_RSD_BALL_TERMS \
+    (1u + SYDO_RSD_ETA_1 + SYDO_RSD_ETA_1 * (SYDO_RSD_ETA_1 - 1u) / 2u + \
+     SYDO_RSD_ETA_1 * (SYDO_RSD_ETA_1 - 1u) * (SYDO_RSD_ETA_1 - 2u) / 6u)
+#define SYDO_RSD_MONOMIALS_PER_DEGREE \
+    (SYDO_RSD_ETA_1 * (SYDO_RSD_ETA_1 - 1u) * (SYDO_RSD_ETA_1 - 2u) * (SYDO_RSD_ETA_1 - 3u) / 24u)
+#define SYDO_RSD_MASK_COUNT (1u << SYDO_RSD_ETA_1)
+#define SYDO_RSD_BLOCK_LENGTH (SYDO_RSD_SELECTOR_TERMS * SYDO_RSD_BALL_TERMS)
+#define SYDO_RSD_COLUMNS (SYDO_RSD_WEIGHT * SYDO_RSD_BLOCK_LENGTH)
+#define SYDO_WITNESS_BYTES ((SYDO_RSD_INPUT_BITS * SYDO_RSD_WEIGHT + 7u) / 8u)
+#define SYDO_WITNESS_BITS (8u * SYDO_WITNESS_BYTES)
+#define SYDO_SYNDROME_BYTES ((SYDO_RSD_SYNDROME_BITS + 7u) / 8u)
+#define SYDO_SYNDROME_FIELDS ((SYDO_RSD_SYNDROME_BITS + SYDO_LAMBDA - 1u) / SYDO_LAMBDA)
+#define SYDO_PK_BYTES (SYDO_SEED_BYTES + SYDO_SYNDROME_BYTES)
+#define SYDO_SK_WITNESS_OFFSET (SYDO_PK_BYTES + SYDO_SEED_BYTES)
+#define SYDO_SK_BYTES (SYDO_SK_WITNESS_OFFSET + SYDO_WITNESS_BYTES)
+#define SYDO_KEYGEN_SEED_BYTES (2u * SYDO_SEED_BYTES)
+#define SYDO_VOLE_HASH_B_BYTES (SYDO_VOLE_HASH_B_BITS / 8u)
+#define SYDO_VOLE_HASH_BYTES (SYDO_SEED_BYTES + SYDO_VOLE_HASH_B_BYTES)
+#define SYDO_VOLE_BYTES (SYDO_WITNESS_BYTES + SYDO_DEGREE * SYDO_SEED_BYTES + SYDO_VOLE_HASH_B_BYTES)
+#define SYDO_VOLE_STRIDE ((SYDO_VOLE_BYTES + 15u) & ~15u)
+#define SYDO_VOLE_CHECK_BYTES (SYDO_VOLE_BYTES - SYDO_VOLE_HASH_BYTES)
+#define SYDO_PROOF_BYTES ((SYDO_DEGREE - 1u) * SYDO_SEED_BYTES)
+#define SYDO_CHALLENGE1_BYTES (5u * SYDO_SEED_BYTES + 8u)
+#define SYDO_CHALLENGE2_BYTES ((3u + SYDO_SYNDROME_FIELDS) * SYDO_SEED_BYTES + 8u)
+#define SYDO_COMMITMENT_BYTES (2u * SYDO_SEED_BYTES)
+#define SYDO_CIPHER_KEY_WORDS (SYDO_CIPHER_KEY_BYTES / 4u)
+#ifndef SYDO_MATRIX_BLOCK_BYTES
+#define SYDO_MATRIX_BLOCK_BYTES 16u
+#endif
+
+#ifdef SYDO_SHORT
+#define SYDO_INSTANCE SYDO_INSTANCE_PREFIX "s"
+#define SYDO_TAU SYDO_TAU_SHORT
+#define SYDO_GRIND_BITS SYDO_GRIND_BITS_SHORT
+#define SYDO_OPEN_NODES SYDO_OPEN_NODES_SHORT
+#else
+#define SYDO_INSTANCE SYDO_INSTANCE_PREFIX "f"
+#define SYDO_TAU SYDO_TAU_FAST
+#define SYDO_GRIND_BITS SYDO_GRIND_BITS_FAST
+#define SYDO_OPEN_NODES SYDO_OPEN_NODES_FAST
+#endif
+/* log2(N) = (lambda - w_grind) / tau. */
+#if SYDO_TAU == 0 || SYDO_GRIND_BITS >= SYDO_LAMBDA
+#error Invalid VOLE repetition or grinding parameter
+#endif
+#if (SYDO_LAMBDA - SYDO_GRIND_BITS) % SYDO_TAU != 0
+#error VOLE challenge bits must divide evenly among repetitions
+#endif
+#define SYDO_DEPTH ((SYDO_LAMBDA - SYDO_GRIND_BITS) / SYDO_TAU)
+
+#define SYDO_LEAVES_PER_ROW (1u << SYDO_DEPTH)
+#define SYDO_TREE_LEAVES (SYDO_TAU * SYDO_LEAVES_PER_ROW)
+#define SYDO_TREE_NODES (2u * SYDO_TREE_LEAVES - 1u)
+#define SYDO_CORRECTIONS_BYTES ((SYDO_TAU - 1u) * SYDO_VOLE_BYTES)
+#define SYDO_OPEN_BYTES ((2u * SYDO_TAU + SYDO_OPEN_NODES) * SYDO_SEED_BYTES)
+
+#define SYDO_SIG_BYTES (SYDO_CORRECTIONS_BYTES + SYDO_VOLE_HASH_BYTES + SYDO_WITNESS_BYTES + SYDO_PROOF_BYTES + 2u * SYDO_SEED_BYTES + SYDO_OPEN_BYTES + 4u)
+
+_Static_assert(SYDO_RSD_N > SYDO_RSD_K, "RSD requires n > k");
+_Static_assert(SYDO_RSD_COLUMNS == SYDO_RSD_N, "RSD requires n = w times the elementary-vector length");
+_Static_assert(SYDO_RSD_L == 2 && SYDO_RSD_ETA_0 == 2 && SYDO_RSD_R_0 == 1 &&
+               SYDO_RSD_ETA_1 == 8 && SYDO_RSD_R_1 == 3 && SYDO_DEGREE == 4,
+               "RSD constraint evaluation requires H(2,1) x H(8,3), d = 4");
+_Static_assert(SYDO_GRIND_BITS <= 8, "Grinding supports at most 8 final-challenge bits");
+_Static_assert(SYDO_DEPTH > 0 && SYDO_DEPTH < 31, "VOLE depth must be between 1 and 30");
+_Static_assert((uint64_t)SYDO_TAU * SYDO_LEAVES_PER_ROW <= UINT32_C(0x40000000), "BAVC tree exceeds the PRG counter domain");
+_Static_assert(SYDO_VOLE_HASH_B_BITS > 0 && SYDO_VOLE_HASH_B_BITS % 8 == 0 &&
+               SYDO_VOLE_HASH_B_BITS <= SYDO_LAMBDA, "VOLE hash B must be a positive byte-aligned length at most lambda");
+
+#endif

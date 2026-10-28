@@ -1,0 +1,24 @@
+#ifndef SYDO_PARAMETERS_512_H
+#define SYDO_PARAMETERS_512_H
+
+/* RSD: n, k, w, d, l, (eta_j), (r_j). */
+#define SYDO_RSD_N               49941u
+#define SYDO_RSD_K               48485u
+#define SYDO_RSD_WEIGHT          179u
+#define SYDO_DEGREE              4u
+#define SYDO_RSD_L               2u
+#define SYDO_RSD_ETA_0           2u
+#define SYDO_RSD_ETA_1           8u
+#define SYDO_RSD_R_0             1u
+#define SYDO_RSD_R_1             3u
+
+/* BAVC/VOLE: tau, w_grind, T_open, B (bits). */
+#define SYDO_TAU_FAST            64u
+#define SYDO_GRIND_BITS_FAST     0u
+#define SYDO_OPEN_NODES_FAST     446u
+#define SYDO_TAU_SHORT           46u
+#define SYDO_GRIND_BITS_SHORT    6u
+#define SYDO_OPEN_NODES_SHORT    445u
+#define SYDO_VOLE_HASH_B_BITS    16u
+
+#endif
