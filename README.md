@@ -239,8 +239,7 @@ The following results were measured using the setup below.
 | Compiler | GCC 14.3.0 | GCC 14.3.0 |
 | Instruction set extensions | No platform-specific extensions | AVX2, AES-NI, PCLMULQDQ, SSSE3, BMI2 |
 | Compiler flags | `-O3 -flto` | `-O3 -flto` |
-| Processor | AMD Ryzen 9 3900X, single core | AMD Ryzen 9 3900X, single core |
-| Clock frequency | 2.2–3.8 GHz configured range, `schedutil` | 2.2–3.8 GHz configured range, `schedutil` |
+| Processor | AMD Ryzen 9 3900X, 3.8 GHz, single core | AMD Ryzen 9 3900X, 3.8 GHz, single core |
 | Memory | 64 GB | 64 GB |
 | Operating system | Ubuntu 22.04 | Ubuntu 22.04 |
 | Library | None | None |
